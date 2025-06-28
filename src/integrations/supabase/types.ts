@@ -9,7 +9,104 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          club: string
+          created_at: string | null
+          current_participants: number | null
+          date: string
+          department: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          logo: string | null
+          max_participants: number | null
+          poster: string | null
+          registration_url: string | null
+          reminder_minutes_before: number | null
+          tags: string[] | null
+          time: string
+          title: string
+          type: string
+          updated_at: string | null
+          venue: string
+        }
+        Insert: {
+          club: string
+          created_at?: string | null
+          current_participants?: number | null
+          date: string
+          department: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo?: string | null
+          max_participants?: number | null
+          poster?: string | null
+          registration_url?: string | null
+          reminder_minutes_before?: number | null
+          tags?: string[] | null
+          time: string
+          title: string
+          type: string
+          updated_at?: string | null
+          venue: string
+        }
+        Update: {
+          club?: string
+          created_at?: string | null
+          current_participants?: number | null
+          date?: string
+          department?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          logo?: string | null
+          max_participants?: number | null
+          poster?: string | null
+          registration_url?: string | null
+          reminder_minutes_before?: number | null
+          tags?: string[] | null
+          time?: string
+          title?: string
+          type?: string
+          updated_at?: string | null
+          venue?: string
+        }
+        Relationships: []
+      }
+      user_event_registrations: {
+        Row: {
+          event_id: string | null
+          id: string
+          notification_enabled: boolean | null
+          registered_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          event_id?: string | null
+          id?: string
+          notification_enabled?: boolean | null
+          registered_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          event_id?: string | null
+          id?: string
+          notification_enabled?: boolean | null
+          registered_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

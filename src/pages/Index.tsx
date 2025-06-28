@@ -4,17 +4,34 @@ import { EventCard } from '@/components/EventCard';
 import { SearchAndFilter } from '@/components/SearchAndFilter';
 import { Header } from '@/components/Header';
 import { OfflineIndicator } from '@/components/OfflineIndicator';
+import { RealtimeIndicator } from '@/components/RealtimeIndicator';
 import { PosterModal } from '@/components/PosterModal';
 import { NotificationManager } from '@/components/NotificationManager';
-import { useEvents } from '@/hooks/useEvents';
+import { RegistrationModal } from '@/components/RegistrationModal';
+import { useSupabaseEvents } from '@/hooks/useSupabaseEvents';
+import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Event } from '@/types/Event';
+import { Button } from '@/components/ui/button';
+import { LogIn, LogOut, User } from 'lucide-react';
 
 const Index = () => {
-  const { events, loading, error, syncEvents, isOnline } = useEvents();
+  const { 
+    events, 
+    loading, 
+    error, 
+    registerForEvent, 
+    unregisterFromEvent, 
+    isUserRegistered,
+    refetch 
+  } = useSupabaseEvents();
+  
+  const { user, signOut } = useAuth();
   const { requestPermission, scheduleReminder } = useNotifications();
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
   const [selectedPoster, setSelectedPoster] = useState<string | null>(null);
+  const [showRegistrationModal, setShowRegistrationModal] = useState(false);
+  const [isOnline] = useState(navigator.onLine);
 
   useEffect(() => {
     setFilteredEvents(events);
@@ -40,6 +57,10 @@ const Index = () => {
     scheduleReminder(event, minutesBefore);
   };
 
+  const handleSync = () => {
+    refetch();
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50 flex items-center justify-center">
@@ -53,9 +74,42 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50">
-      <Header onSync={syncEvents} isOnline={isOnline} />
+      <Header onSync={handleSync} isOnline={isOnline} />
       <OfflineIndicator isOnline={isOnline} />
+      <RealtimeIndicator />
       
+      {/* User Authentication Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+        <div className="flex justify-end">
+          {user ? (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <User className="w-4 h-4" />
+                <span>{user.email}</span>
+              </div>
+              <Button
+                onClick={signOut}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </Button>
+            </div>
+          ) : (
+            <Button
+              onClick={() => setShowRegistrationModal(true)}
+              className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
+              size="sm"
+            >
+              <LogIn className="w-4 h-4" />
+              Sign In / Sign Up
+            </Button>
+          )}
+        </div>
+      </div>
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
@@ -64,6 +118,11 @@ const Index = () => {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Your centralized hub for all campus events. Never miss what matters to you.
           </p>
+          {user && (
+            <p className="text-sm text-green-600 mt-2 font-medium">
+              ✨ Real-time updates enabled • Registration features active
+            </p>
+          )}
         </div>
 
         <SearchAndFilter 
@@ -91,6 +150,9 @@ const Index = () => {
                 event={event}
                 onPosterClick={setSelectedPoster}
                 onReminderSet={handleReminderSet}
+                onRegister={registerForEvent}
+                onUnregister={unregisterFromEvent}
+                isRegistered={isUserRegistered(event.id)}
               />
             ))}
           </div>
@@ -100,6 +162,12 @@ const Index = () => {
       <PosterModal 
         posterUrl={selectedPoster} 
         onClose={() => setSelectedPoster(null)} 
+      />
+      
+      <RegistrationModal
+        isOpen={showRegistrationModal}
+        onClose={() => setShowRegistrationModal(false)}
+        onSuccess={() => {}}
       />
       
       <NotificationManager />
