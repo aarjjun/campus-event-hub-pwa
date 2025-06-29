@@ -1,12 +1,24 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Event, UserEventRegistration } from '@/types/Event';
+import { Event } from '@/types/Event';
 import { useToast } from '@/hooks/use-toast';
+
+// Define a type that matches the actual event_registrations table structure
+interface EventRegistration {
+  id: string;
+  event_id: string;
+  name: string;
+  email: string;
+  phone: string;
+  department: string;
+  semester: string;
+  registered_at: string;
+}
 
 export const useSupabaseEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
-  const [userRegistrations, setUserRegistrations] = useState<UserEventRegistration[]>([]);
+  const [userRegistrations, setUserRegistrations] = useState<EventRegistration[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -32,10 +44,12 @@ export const useSupabaseEvents = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Since there's no user_id in event_registrations table, 
+      // we'll fetch registrations by email for now
       const { data, error } = await supabase
-        .from('user_event_registrations')
+        .from('event_registrations')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('email', user.email);
 
       if (error) throw error;
       setUserRegistrations(data || []);
@@ -56,24 +70,27 @@ export const useSupabaseEvents = () => {
         return false;
       }
 
+      // For now, we'll create a registration with user info
+      // Note: This is a simplified approach since the current schema doesn't have user_id
       const { error } = await supabase
-        .from('user_event_registrations')
+        .from('event_registrations')
         .insert({
-          user_id: user.id,
           event_id: eventId,
-          notification_enabled: true
+          name: user.user_metadata?.full_name || user.email || 'Anonymous',
+          email: user.email || '',
+          phone: user.user_metadata?.phone || '',
+          department: user.user_metadata?.department || 'Not specified',
+          semester: user.user_metadata?.semester || 'Not specified'
         });
 
       if (error) {
-        if (error.code === '23505') { // Unique constraint violation
-          toast({
-            title: "Already Registered",
-            description: "You are already registered for this event",
-            variant: "destructive",
-          });
-          return false;
-        }
-        throw error;
+        console.error('Registration error:', error);
+        toast({
+          title: "Registration Failed",
+          description: "Unable to register for the event. Please try again.",
+          variant: "destructive",
+        });
+        return false;
       }
 
       toast({
@@ -100,10 +117,10 @@ export const useSupabaseEvents = () => {
       if (!user) return false;
 
       const { error } = await supabase
-        .from('user_event_registrations')
+        .from('event_registrations')
         .delete()
-        .eq('user_id', user.id)
-        .eq('event_id', eventId);
+        .eq('event_id', eventId)
+        .eq('email', user.email);
 
       if (error) throw error;
 
@@ -166,7 +183,7 @@ export const useSupabaseEvents = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'user_event_registrations'
+          table: 'event_registrations'
         },
         (payload) => {
           console.log('Registration change received:', payload);
