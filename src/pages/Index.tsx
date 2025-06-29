@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { EventCard } from '@/components/EventCard';
 import { SearchAndFilter } from '@/components/SearchAndFilter';
@@ -13,7 +12,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNotifications } from '@/hooks/useNotifications';
 import { Event } from '@/types/Event';
 import { Button } from '@/components/ui/button';
-import { LogIn, LogOut, User } from 'lucide-react';
+import { LogIn, LogOut, User, Settings } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   const { 
@@ -87,6 +87,16 @@ const Index = () => {
                 <User className="w-4 h-4" />
                 <span>{user.email}</span>
               </div>
+              <Link to="/admin">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Settings className="w-4 h-4" />
+                  Admin
+                </Button>
+              </Link>
               <Button
                 onClick={signOut}
                 variant="outline"

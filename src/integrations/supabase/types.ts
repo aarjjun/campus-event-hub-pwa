@@ -9,6 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      event_registrations: {
+        Row: {
+          department: string
+          email: string
+          event_id: string
+          id: string
+          name: string
+          phone: string
+          registered_at: string | null
+          semester: string
+        }
+        Insert: {
+          department: string
+          email: string
+          event_id: string
+          id?: string
+          name: string
+          phone: string
+          registered_at?: string | null
+          semester: string
+        }
+        Update: {
+          department?: string
+          email?: string
+          event_id?: string
+          id?: string
+          name?: string
+          phone?: string
+          registered_at?: string | null
+          semester?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_registrations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           club: string
@@ -74,38 +115,6 @@ export type Database = {
           venue?: string
         }
         Relationships: []
-      }
-      user_event_registrations: {
-        Row: {
-          event_id: string | null
-          id: string
-          notification_enabled: boolean | null
-          registered_at: string | null
-          user_id: string | null
-        }
-        Insert: {
-          event_id?: string | null
-          id?: string
-          notification_enabled?: boolean | null
-          registered_at?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          event_id?: string | null
-          id?: string
-          notification_enabled?: boolean | null
-          registered_at?: string | null
-          user_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "user_event_registrations_event_id_fkey"
-            columns: ["event_id"]
-            isOneToOne: false
-            referencedRelation: "events"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {
