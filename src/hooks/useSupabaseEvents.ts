@@ -70,6 +70,23 @@ export const useSupabaseEvents = () => {
         return false;
       }
 
+      // Check if user is already registered
+      const { data: existingRegistration } = await supabase
+        .from('event_registrations')
+        .select('id')
+        .eq('event_id', eventId)
+        .eq('email', user.email)
+        .maybeSingle();
+
+      if (existingRegistration) {
+        toast({
+          title: "Already Registered",
+          description: "You are already registered for this event",
+          variant: "destructive",
+        });
+        return false;
+      }
+
       // For now, we'll create a registration with user info
       // Note: This is a simplified approach since the current schema doesn't have user_id
       const { error } = await supabase

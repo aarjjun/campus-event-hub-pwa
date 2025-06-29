@@ -11,34 +11,34 @@ export type Database = {
     Tables: {
       event_registrations: {
         Row: {
-          department: string
+          department: string | null
           email: string
           event_id: string
           id: string
           name: string
-          phone: string
+          phone: string | null
           registered_at: string | null
-          semester: string
+          semester: string | null
         }
         Insert: {
-          department: string
+          department?: string | null
           email: string
           event_id: string
           id?: string
           name: string
-          phone: string
+          phone?: string | null
           registered_at?: string | null
-          semester: string
+          semester?: string | null
         }
         Update: {
-          department?: string
+          department?: string | null
           email?: string
           event_id?: string
           id?: string
           name?: string
-          phone?: string
+          phone?: string | null
           registered_at?: string | null
-          semester?: string
+          semester?: string | null
         }
         Relationships: [
           {
